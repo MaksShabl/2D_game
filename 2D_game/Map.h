@@ -12,9 +12,9 @@ public:
 
 private:
 	SDL_Rect src, dest;
-	SDL_Texture* dirt;
-	SDL_Texture* water;
-	SDL_Texture* grass;
+	SDL_Texture* table;
+	SDL_Texture* wall;
+	SDL_Texture* text;
 
 	int map[20][25];
 };

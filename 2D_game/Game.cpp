@@ -1,18 +1,19 @@
 #include "Game.h"
 #include "TextureManager.h"
-#include "GameObject.h"
 #include "Map.h"
-#include "ECS.h"
 #include "Components.h"
+#include "Menu.h"
+#include "Vector2D.h"
 
-GameObject* player;
-GameObject* Pen;
+Menu* menu;
 Map* map;
+SDL_Color color = { 255, 0, 0, 0 };
 
 SDL_Renderer* Game::renderer = nullptr;
+SDL_Event Game::event;
 
 Manager manager;
-auto& newPlayer(manager.addEntity());
+auto& player(manager.addEntity());
 
 Game::Game()
 {}
@@ -34,36 +35,24 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 		std::cout << "Subsystems initialised!..." << std::endl;
 
 		window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
-		if (window)
-		{
-			std::cout << "Window created" << std::endl;
-		}
 
 		renderer = SDL_CreateRenderer(window, -1, 0);
-		if (renderer)
-		{
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			std::cout << "Renderer created" << std::endl;
-		}
 
 		isRunning = true;
 	}
-	else
-	{
-		isRunning = false;
-	}
-	
-	player = new GameObject("assets/Pen.png", 0, 0);
-	Pen = new GameObject("assets/player.png", 200, 50);
+
+	menu = new Menu();
 	map = new Map();
 
-	newPlayer.addComponent<PositionComponent>();
+	// ECS implementation
+
+	player.addComponent<TransformComponent>(230, 330);
+	player.addComponent<SpriteComponent>("assets/let1.png");
+	player.addComponent<KeyboardController>();
 }
 
 void Game::handleEvents()
 {
-	SDL_Event event;
-
 	SDL_PollEvent(&event);
 	
 	switch (event.type)
@@ -78,19 +67,17 @@ void Game::handleEvents()
 
 void Game::update()
 {
-	player->Update();
-	Pen->Update();
+	manager.refresh();
 	manager.update();
-	std::cout << newPlayer.getComponent<PositionComponent>().x() << "," <<
-		newPlayer.getComponent<PositionComponent>().y() << std::endl;
+	
 }
 
 void Game::render()
 {
 	SDL_RenderClear(renderer);
 	map->DrawMap();
-	player->Render();
-	Pen->Render();
+
+	manager.draw();
 	SDL_RenderPresent(renderer);
 }
 
